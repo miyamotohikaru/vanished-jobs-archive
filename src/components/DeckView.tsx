@@ -7,7 +7,7 @@ import TiltCard from "@/components/TiltCard";
 import { Job } from "@/data/jobs";
 import { useLang } from "@/lib/lang";
 import { readDeckAt, saveDeckAt, saveReturn } from "@/lib/returnNav";
-import { primeTick, spinSound, tapSound, tick } from "@/lib/tick";
+import { primeTick, tapSound, tick } from "@/lib/tick";
 
 /**
  * デッキ表示。151枚を「束」として見せ、指で送る。
@@ -30,6 +30,12 @@ const TAP_MS = 400;
 const MOMENTUM_MS = 150;
 /** 一度に送る上限(枚) */
 const MAX_GLIDE = 40;
+/**
+ * 束が行きすぎて戻ってきただけのとき、同じ線をもう一度鳴らさないための幅（枚）。
+ * バネの行きすぎは1枚の約1%なので、それを充分に越える広さにとる。
+ * 指で線をまたいで戻すぶんには、これより深く入るので鳴る。
+ */
+const LINE_HYST = 0.12;
 const SPRING_K = 210;
 const SPRING_C = 24;
 
@@ -466,6 +472,12 @@ export default function DeckView({
 
   const posRef = useRef(0);
   const anchorRef = useRef(0);
+  /** いま束のどの目盛りの中にいるか。pos の切り捨て（下の syncAnchor 参照） */
+  const cellRef = useRef(0);
+  /** 最後に越えた線。まだ1本も越えていないことを NaN で表す（NaN は何とも一致しない） */
+  const lastLineRef = useRef(NaN);
+  /** その線を越えてから、いちばん遠くまで離れた距離（カード枚数） */
+  const awayRef = useRef(0);
   const velRef = useRef(0); // px/s（バネ用）
   const targetRef = useRef(0);
   const rafRef = useRef(0);
@@ -640,6 +652,7 @@ export default function DeckView({
     posRef.current = i;
     targetRef.current = i;
     anchorRef.current = i;
+    cellRef.current = i;
     setAnchor(i);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -679,11 +692,43 @@ export default function DeckView({
   });
 
   const syncAnchor = useCallback(() => {
-    const a = Math.round(posRef.current);
+    const pos = posRef.current;
+
+    /*
+     * 音を鳴らす瞬間。
+     *
+     * 前面カードの右縁のところに、画面に貼りついた線が1本あると考える。
+     * 束が動くと、どのカードもその線を順に横切っていく。横切るのは
+     * そのカードが真ん中に来たとき、つまり pos が整数になった瞬間。
+     * （横送りでは rel 枚ぶん離れたカードの右縁は
+     *   0.28*rel + 0.5*(1 - 0.028*|rel|) 枚ぶんのところにあり、
+     *   前面の右縁 0.5 と重なるのは rel = 0 のときだけ）
+     *
+     * ここを Math.round の変わり目で鳴らすと、鳴るのは pos が x.5 のとき＝
+     * カードが2枚で真ん中を挟んでいる、目には何も起きていない瞬間になる。
+     * 半枚ぶん先走って鳴っていたので、音と絵が噛み合っていなかった。
+     */
+    const cell = Math.floor(pos);
+    if (cell !== cellRef.current) {
+      const line = cell > cellRef.current ? cell : cell + 1;
+      // バネが1%ほど行きすぎて戻る。そのぶんで同じ線を3回またぐので、
+      // 前の線からまだ離れていないうちの再交差は鳴らさない
+      const bounce = line === lastLineRef.current && awayRef.current < LINE_HYST;
+      if (!bounce) tick();
+      cellRef.current = cell;
+      lastLineRef.current = line;
+      awayRef.current = 0;
+    } else {
+      awayRef.current = Math.max(
+        awayRef.current,
+        Math.abs(pos - lastLineRef.current)
+      );
+    }
+
+    // 「いまどのカードか」は四捨五入のまま。真ん中にいちばん近い1枚を指す
+    const a = Math.round(pos);
     if (a !== anchorRef.current) {
       anchorRef.current = a;
-      // 1枚ぶん送られた合図。速い送りでは音の側で自動的に間引かれる
-      tick();
       setAnchor(a);
     }
   }, []);
@@ -703,6 +748,8 @@ export default function DeckView({
     targetRef.current -= shift;
     baseRef.current -= shift;
     anchorRef.current -= shift;
+    cellRef.current -= shift;
+    lastLineRef.current -= shift;
     setAnchor(anchorRef.current);
   }, []);
 
@@ -748,9 +795,6 @@ export default function DeckView({
       const from = posRef.current;
       const d = Math.abs(target - from);
       const dur = Math.min(300 + 55 * d, 950);
-      // 何枚も送るときだけ、下に回転音を敷く。
-      // 1〜2枚で鳴らすと、ただ隣へ動かしただけで大袈裟になる
-      if (d >= 3) spinSound(d, dur);
       const t0 = performance.now();
       const tick = (now: number) => {
         const t = Math.min((now - t0) / dur, 1);
