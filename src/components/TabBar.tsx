@@ -8,7 +8,6 @@ const tabs = [
   { href: "/", ja: "索引", en: "Index" },
   { href: "/timeline", ja: "年表", en: "Timeline" },
   { href: "/lineage", ja: "系譜", en: "Lineage" },
-  { href: "/about", ja: "About", en: "About" },
 ];
 
 export default function TabBar() {
