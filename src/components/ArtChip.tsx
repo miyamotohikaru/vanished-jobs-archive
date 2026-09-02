@@ -40,8 +40,13 @@ export default function ArtChip({
     <Link
       href={href}
       onClick={() => saveReturn()}
-      className={`relative inline-flex items-center whitespace-nowrap rounded-xl tracking-wider transition-transform hover:-translate-y-0.5 ${
-        sm ? "h-11 pr-2.5 text-[10px] md:h-14 md:pr-4 md:text-xs" : "h-20 pr-5 text-sm"
+      className={`relative inline-flex max-w-full items-center rounded-xl tracking-wider transition-transform hover:-translate-y-0.5 ${
+        sm
+          ? // 携帯では列の幅(約175px)に対して名前が長すぎるものがあり、
+            // 1行のまま伸ばすと列からも画面からもはみ出して端が切れる。
+            // 折り返させて、高さのほうを伸ばす（丈は下限だけ決めておく）
+            "min-h-11 whitespace-normal py-1 pr-2.5 text-[10px] md:h-14 md:whitespace-nowrap md:py-0 md:pr-4 md:text-xs"
+          : "h-20 whitespace-nowrap pr-5 text-sm"
       } ${pad} ${ongoing ? "border border-dashed border-vja-blue text-vja-blue" : ""}`}
       style={ongoing ? undefined : { background: job.color, color: job.textColor }}
     >
@@ -53,7 +58,9 @@ export default function ArtChip({
           height={280}
           className={`pointer-events-none absolute bottom-1 left-1 ${
             sm
-              ? "h-[122%] max-w-[3rem] md:max-w-[4.7rem]"
+              ? // 丈で決めると、折り返して背が伸びたチップだけ絵が大きくなる。
+                // いまと同じ見え方（44px/56px の 122%）を実寸で固定する
+                "h-[3.355rem] max-w-[3rem] md:h-[4.27rem] md:max-w-[4.7rem]"
               : "h-[133%] max-w-[6.6rem]"
           }`}
           style={{ objectFit: "contain", objectPosition: "left bottom", width: "auto" }}
