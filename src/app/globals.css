@@ -216,32 +216,17 @@ body {
    実測（1440x900）では、束の上に ヘッダ56 + ヒーロー373 + 2本のバー132 が積まれ、
    残り339pxにカード597px＋操作系121pxを入れようとして、289pxはみ出していた。
 
-   ヒーローは消さずに畳む。題と惹句は残し、ローマ字の副題だけ伏せて
-   余白を詰める。一覧に切り替えれば元のヒーローが戻る。
-   伏せる相手は順番ではなく名前で指す（行が増減しても取り違えない）。 */
+   ヒーローは惹句の一行だけなので、詰めるのは余白だけでよい。
+   一覧に切り替えれば元の余白が戻る。 */
 html[data-vja-view="deck"] .vja-hero {
   padding-top: 1.25rem;
   /* 惹句と SORT の枡のあいだを2行ぶん空ける。
-     詰めすぎると題・惹句・バーが一続きの塊に見えて、どこからが操作なのか分からない */
+     詰めすぎると惹句とバーが一続きの塊に見えて、どこからが操作なのか分からない */
   padding-bottom: 2.5rem;
-}
-html[data-vja-view="deck"] .vja-hero h1 {
-  margin-top: 0.5rem;
-  font-size: 1.75rem;
-}
-/* ローマ字の副題だけ伏せる */
-html[data-vja-view="deck"] .vja-hero-sub {
-  display: none;
-}
-html[data-vja-view="deck"] .vja-hero-lead {
-  margin-top: 0.5rem;
 }
 @media (min-width: 768px) {
   html[data-vja-view="deck"] .vja-hero {
     padding-top: 1.75rem;
-  }
-  html[data-vja-view="deck"] .vja-hero h1 {
-    font-size: 2.25rem;
   }
 }
 /* めくり方のバーも、束のときだけ出ているものなので薄く詰める */
@@ -265,17 +250,12 @@ html[data-vja-view="deck"] .vja-flips {
      この一行が図鑑の入口なので、狭いからといって伏せない。
      詰めるのは余白と枡目の高さで足りている */
   html[data-vja-view="deck"] .vja-hero-lead {
-    margin-top: 0.35rem;
     font-size: 0.75rem;
   }
   /* 枡目の高さも譲る。押せる範囲は残したいので詰めるだけ */
   html[data-vja-view="deck"] .vja-bar-cell {
     padding-top: 0.7rem;
     padding-bottom: 0.7rem;
-  }
-  html[data-vja-view="deck"] .vja-hero h1 {
-    margin-top: 0;
-    font-size: 1.5rem;
   }
   /* めくり方は折り返さず、あふれたら横に流す（2行になると54px使う） */
   html[data-vja-view="deck"] .vja-flips {
