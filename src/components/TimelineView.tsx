@@ -41,7 +41,8 @@ function JobChip({ job, en }: { job: (typeof jobs)[number]; en: boolean }) {
     <ArtChip job={job} href={`/jobs/${job.no}`} ongoing={job.status === "ongoing"}>
       <span className={long ? "text-[8.5px] md:text-[11px]" : "text-[9.5px] md:text-xs"}>
         <span className="font-semibold">{name}</span>{" "}
-        <span className="text-[8px] opacity-85 md:text-[10px]">
+        {/* 携帯では名前が折り返る。日付の途中で割れると読めないので、ここは割らせない */}
+        <span className="whitespace-nowrap text-[8px] opacity-85 md:text-[10px]">
           {m.mark}
           {job.endLabel}
         </span>
@@ -73,19 +74,6 @@ export default function TimelineView() {
             </>
           )}
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-xs leading-relaxed tracking-wider text-vja-ink-soft">
-          {en ? (
-            "From antiquity to today. The center band marks events of machines, technology, and institutions — many jobs took their last breath beside them."
-          ) : (
-            <>
-              古代から現在まで。
-              <br className="md:hidden" />
-              中央の帯は「機械・技術・制度」のできごと——
-              <br className="md:hidden" />
-              多くの職業は、この隣で息を止めた。
-            </>
-          )}
-        </p>
       </header>
 
       {/* フィルタ */}

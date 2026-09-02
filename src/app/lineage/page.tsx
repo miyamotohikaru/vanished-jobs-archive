@@ -47,12 +47,27 @@ export default function LineagePage() {
           LINEAGE · {lineageChains.length} CHAINS
         </p>
         <h1 className="mt-4 text-3xl font-bold tracking-[0.15em] md:text-4xl">
-          <T ja="仕事は、消えない。" en="Jobs never die." />
+          <T
+            ja={
+              <>
+                仕事が受け継がれた
+                <br className="md:hidden" />
+                順に、つなぐ。
+              </>
+            }
+            en="In the order they were handed on."
+          />
         </h1>
         <p className="mt-3 text-sm tracking-wider text-vja-accent">
           <T
-            ja="名前を変えて、消えつづける。"
-            en="They keep vanishing, under new names."
+            ja={
+              <>
+                消えた仕事の役目を、
+                <br className="md:hidden" />
+                次のどの仕事が引き取ったか。
+              </>
+            }
+            en="Which job took over the work of the one that vanished."
           />
         </p>
       </header>
