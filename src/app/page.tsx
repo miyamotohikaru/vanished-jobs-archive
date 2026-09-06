@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import IndexView from "@/components/IndexView";
 import { T } from "@/lib/lang";
+
+// ?x=1 のようにクエリを付けて配っても、素のURLと同じ1ページとして扱われるように。
+// canonical を layout に置くと詳細ページ151件まで索引を指してしまうので、ここに置く。
+export const metadata: Metadata = {
+  alternates: { canonical: "https://vanished-jobs-archive.kosukuma.com" },
+};
 
 export default function Home() {
   return (
