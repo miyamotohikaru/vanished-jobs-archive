@@ -2,7 +2,9 @@
 export const dict = {
   status: {
     extinct: "Extinct",
-    transformed: "Transformed",
+    // 「変質」。Transformed だと他の2つより倍近く長く、カードの丸いラベルに入らない。
+    // 締めの一文でも changed after ... と言っているので、そちらに揃える
+    transformed: "Changed",
     ongoing: "Ongoing",
   } as Record<string, string>,
   category: {
