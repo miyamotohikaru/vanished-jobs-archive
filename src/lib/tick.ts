@@ -95,7 +95,9 @@ export function tick() {
   last = now;
 
   if (ctx && ctx.state === "suspended") void ctx.resume();
-  if (ctx && bus && noise) {
+  // 眠っている器に予約すると、時計が0のまま溜まり、起きた瞬間に
+  // それまでのぶんが一斉に鳴って「バツッ」となる。眠っている間は捨てる
+  if (ctx && ctx.state === "running" && bus && noise) {
     const t = ctx.currentTime;
 
     // 弾かれた瞬間の角。ここが立っていないと「コッ」ではなく「ポッ」になる。
@@ -144,6 +146,8 @@ export function tapSound() {
   if (!enabled) return;
   if (ctx && ctx.state === "suspended") void ctx.resume();
   if (!ctx || !bus || !noise) return;
+  // 眠っているあいだは鳴らさない（tick と同じ理由）
+  if (ctx.state !== "running") return;
   const t = ctx.currentTime;
 
   // 紙が擦れて離れる音。高いところから低いところへ帯を滑らせるのが要で、

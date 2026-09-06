@@ -918,6 +918,11 @@ export default function DeckView({
    * こうしておけば、そのあとホイールで送ってもちゃんと鳴る
    */
   useEffect(() => {
+    // 開いた時点で器だけ用意しておく。
+    // ブラウザが許す相手（そのサイトで音を鳴らした覚えがある場合など）には
+    // これで最初から目を覚ました器が渡り、1回目のスクロールから鳴る。
+    // 許されなければ眠ったまま用意され、下の最初の一操作で起きる
+    primeTick();
     const prime = () => primeTick();
     const kinds = ["pointerdown", "keydown", "touchstart"] as const;
     for (const k of kinds)
