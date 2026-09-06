@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  共有時に出る絵（1200×630）の版下。
+  右に置く束は tools/shoot-og.mjs が実際のサイトから撮ってくる。
+  ここを直したら node tools/shoot-og.mjs で public/og.png を焼き直す。
+-->
+<html lang="ja">
+<meta charset="utf-8">
+<title>OG版下</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+  /* 色はサイト本体（globals.css）と同じもの */
+  :root {
+    --bg: #e9e4d7;
+    --ink: #3a2e22;
+    --soft: rgba(58, 46, 34, 0.62);
+    --accent: #b04a3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #333; }
+
+  #og {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* 撮ってきた束。位置と大きさは shoot-og.mjs が測って渡す */
+  .deck { position: absolute; }
+
+  /* 左は題字を置くので、地の色をかぶせて束を奥へ引かせる */
+  .veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--bg) 0%,
+      rgba(233, 228, 215, 0.97) 33%,
+      rgba(233, 228, 215, 0.6) 49%,
+      rgba(233, 228, 215, 0) 64%
+    );
+  }
+
+  .txt {
+    position: absolute;
+    left: 72px;
+    top: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .kick {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 15px;
+    letter-spacing: 0.3em;
+    color: var(--soft);
+    margin-bottom: 26px;
+  }
+  .ttl {
+    font-family: "Shippori Mincho", serif;
+    font-weight: 700;
+    font-size: 78px;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .en {
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: var(--soft);
+    margin-top: 14px;
+  }
+  .rule { width: 64px; height: 2px; background: var(--accent); margin: 30px 0 26px; }
+  .lead {
+    font-family: "Shippori Mincho", serif;
+    font-weight: 600;
+    font-size: 23px;
+    line-height: 1.95;
+    color: var(--ink);
+  }
+  .url {
+    position: absolute;
+    left: 74px;
+    bottom: 44px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--soft);
+  }
+</style>
+<div id="og">
+  <img class="deck" alt="">
+  <div class="veil"></div>
+  <div class="txt">
+    <div class="kick">ARCHIVE ・ 151 ENTRIES</div>
+    <div class="ttl">消滅職業図鑑</div>
+    <div class="en">Vanished Jobs Archive.</div>
+    <div class="rule"></div>
+    <div class="lead">「コンピュータ」は、<br>かつて人間の職業だった。</div>
+  </div>
+  <div class="url">vanished-jobs-archive.kosukuma.com</div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const deck = document.querySelector(".deck");
+  deck.style.width = (q.get("w") ?? 1400) + "px";
+  deck.style.left = (q.get("left") ?? 190) + "px";
+  deck.style.top = (q.get("top") ?? 39) + "px";
+  deck.src = q.get("deck") ?? "og-deck.png";
+</script>
+</html>
