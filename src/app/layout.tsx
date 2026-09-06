@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import TabBar from "@/components/TabBar";
 import { LangProvider } from "@/lib/lang";
 import ScrollRestorer from "@/components/ScrollRestorer";
+import { OG_VERSION } from "./og-version";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -31,11 +32,33 @@ const jost = Jost({
   variable: "--font-jost",
 });
 
+const SITE_URL = "https://vanished-jobs-archive.kosukuma.com";
+const DESCRIPTION =
+  "「コンピュータ」は、かつて人間の職業だった。消えた職業151種を、こすくまくんと記録する図鑑。";
+// 共有したときに出る絵。索引（束）の画面を撮ったもので、
+// 焼き直しは node tools/shoot-og.mjs。焼くたびに ?v= が変わり、
+// SNS が持っている古い絵を捨てて取り直す。
+const OG_IMAGE = `${SITE_URL}/og.png?v=${OG_VERSION}`;
+
 export const metadata: Metadata = {
   title: "消滅職業図鑑 | Vanished Jobs Archive.",
-  description:
-    "「コンピュータ」は、かつて人間の職業だった。消えた職業151種を、こすくまくんと記録する図鑑。",
+  description: DESCRIPTION,
   robots: { index: false, follow: false },
+  openGraph: {
+    title: "消滅職業図鑑",
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "消滅職業図鑑",
+    locale: "ja_JP",
+    type: "website",
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "消滅職業図鑑" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "消滅職業図鑑",
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+  },
 };
 
 export default function RootLayout({
