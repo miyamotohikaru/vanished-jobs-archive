@@ -37,9 +37,19 @@ export function setTickEnabled(on: boolean) {
   enabled = on;
 }
 
-/** ユーザー操作の中から呼ぶ。2回目以降は何もしない */
+/**
+ * ユーザー操作の中から呼ぶ。2回目以降は止まっているときだけ起こす。
+ *
+ * ブラウザは「押した・叩いた」以外を操作と認めないので、
+ * ホイールだけを回している人にはここで作った器がまだ眠っていることがある。
+ * その場合も器は用意しておき、最初の押し込みで目を覚まさせる。
+ */
 export function primeTick() {
-  if (typeof window === "undefined" || ctx) return;
+  if (typeof window === "undefined") return;
+  if (ctx) {
+    if (ctx.state === "suspended") void ctx.resume();
+    return;
+  }
   const AC =
     window.AudioContext ??
     (window as unknown as { webkitAudioContext?: typeof AudioContext })
@@ -57,6 +67,12 @@ export function primeTick() {
     noise = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = noise.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    // 無音をひとつ鳴らして器を温めておく。
+    // これをしないと、いちばん最初の1回が欠けることがある
+    const warm = ctx.createBufferSource();
+    warm.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+    warm.connect(ctx.destination);
+    warm.start();
   } catch {
     ctx = null;
   }

@@ -51,6 +51,30 @@ function effLen(s: string) {
   return n;
 }
 
+/**
+ * 実効文字数1つあたり、実際に何em ぶんの幅を食うか。
+ *
+ * 和文は1文字=1emでほぼ設計どおり（151枚の実測で 0.95〜1.00）。
+ * 欧文は太字の明朝だと半角が0.5emに収まらず、実測で 0.91〜1.28 に散らばる。
+ * 散らばるのは大文字や M・W が広いため。どれも溢れないよう、いちばん広い
+ * 1.28 で見積もる（そのぶん細い綴りの名前は少し小さめに出る）。
+ * ここを見ずに文字数だけで縮めていたので、英語のときだけ名前が
+ * カードからはみ出していた（151枚中60枚、最大で幅の27%ぶん）。
+ */
+const NAME_K = { ja: 1.0, en: 1.28 };
+/** ステータスの丸いラベルの中身。字間0.15emぶんを込みで実測した値 */
+const PILL_K = { ja: 1.15, en: 1.5 };
+/** カードの内側に使える幅（左右に7cqwずつ余白があるので86cqw）。少し控えて使う */
+const INNER_W = 85;
+/**
+ * ステータスの丸いラベルに渡せる幅。
+ * 下線が左から60cqwまで伸びているので、そこから内側の右端(93cqw)までが持ち分。
+ * これを超えると下線に被さり、右の余白も無くなる（英語で実際にそうなっていた）
+ */
+const PILL_W = 32;
+/** 丸いラベルの左右の余白（px-[5.5cqw] の2つぶん） */
+const PILL_PAD = 11;
+
 export default function JobCard({ job }: { job: Job }) {
   const { lang } = useLang();
   const en = lang === "en";
@@ -64,8 +88,11 @@ export default function JobCard({ job }: { job: Job }) {
     ? `${statusMeta[job.status].mark}${dict.status[job.status]}${job.endLabel ? ` ${job.endLabel}` : ""}`
     : `${statusMeta[job.status].mark}${statusMeta[job.status].label}${job.endLabel ? ` ${job.endLabel}` : ""}`;
 
-  // 名前は必ず1行に収める: カード内幅86cqwに対し収まるサイズへ縮小（上限8.8cqw）
-  const nameSize = Math.min(8.8, 84 / effLen(name));
+  // 名前は必ず1行に収める: カードの内側に収まるサイズへ縮小（上限8.8cqw）
+  const nameSize = Math.min(
+    8.8,
+    INNER_W / (effLen(name) * NAME_K[en ? "en" : "ja"])
+  );
 
   const span = yearSpans[job.no];
   if (span) {
@@ -156,7 +183,15 @@ function NewCard({
   span: { start: number; end: number };
 }) {
   const statusLabel = en ? dict.status[job.status] : statusMeta[job.status].label;
-  const nameSize = Math.min(11, 90 / effLen(name));
+  const nameSize = Math.min(
+    11,
+    INNER_W / (effLen(name) * NAME_K[en ? "en" : "ja"])
+  );
+  // 丸いラベルも持ち分に収める。和文は今までどおり6cqwのまま（収まっている）
+  const statusSize = Math.min(
+    6,
+    (PILL_W - PILL_PAD) / (effLen(statusLabel) * PILL_K[en ? "en" : "ja"])
+  );
   // 読みも必ず1行に（字送り0.5emぶんを見込んで1文字=1.5倍幅で計算）
   const readingSize = Math.min(3.4, 56 / Math.max(1, effLen(reading)));
   const years = lifespan(span.start, span.end);
@@ -205,8 +240,12 @@ function NewCard({
             NO.{job.no}
           </span>
           <span
-            className="ml-[3cqw] shrink-0 whitespace-nowrap rounded-full px-[5.5cqw] py-[2cqw] text-[6cqw] font-bold tracking-[0.15em]"
-            style={{ background: job.textColor, color: job.color }}
+            className="ml-[3cqw] shrink-0 whitespace-nowrap rounded-full px-[5.5cqw] py-[2cqw] font-bold tracking-[0.15em]"
+            style={{
+              background: job.textColor,
+              color: job.color,
+              fontSize: `${statusSize}cqw`,
+            }}
           >
             {statusLabel}
           </span>

@@ -905,11 +905,28 @@ export default function DeckView({
         if (!stage.current?.contains(a) && !a.closest(".vja-deck-nav")) return;
       }
       e.preventDefault();
+      primeTick();
       step(e.key === "ArrowRight" ? 1 : -1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [step]);
+
+  /*
+   * 音の器は「押した・叩いた」の中でしか目を覚まさない決まりになっている。
+   * 束を触る前に、画面のどこでもいいので最初の一操作で用意しておく。
+   * こうしておけば、そのあとホイールで送ってもちゃんと鳴る
+   */
+  useEffect(() => {
+    const prime = () => primeTick();
+    const kinds = ["pointerdown", "keydown", "touchstart"] as const;
+    for (const k of kinds)
+      window.addEventListener(k, prime, { once: true, capture: true });
+    return () => {
+      for (const k of kinds)
+        window.removeEventListener(k, prime, { capture: true });
+    };
+  }, []);
 
   // ホイール／トラックパッド。1回のはらいで1枚だけ送る
   const stepRef = useRef(step);
@@ -922,6 +939,9 @@ export default function DeckView({
     let cooldown = 0;
     let axis: "x" | "y" | null = null;
     const onWheel = (e: WheelEvent) => {
+      // 指で押さずにホイールだけで送る人がいる。
+      // ここで呼ばないと、その人には最後まで音が鳴らない
+      primeTick();
       const now = performance.now();
       const u = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
       const dx = e.deltaX * u;
