@@ -43,7 +43,6 @@ const OG_IMAGE = `${SITE_URL}/og.png?v=${OG_VERSION}`;
 export const metadata: Metadata = {
   title: "消滅職業図鑑 | Vanished Jobs Archive.",
   description: DESCRIPTION,
-  robots: { index: false, follow: false },
   openGraph: {
     title: "消滅職業図鑑",
     description: DESCRIPTION,
